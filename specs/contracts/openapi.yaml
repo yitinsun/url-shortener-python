@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: URL Shortener API
+  version: 0.1.0
+  description: >
+    Create a short code from a long HTTP(S) URL and redirect that code.
+    Matches specs/greenfield/PRD.md. Click analytics, auth, and custom aliases
+    are out of v1. Interactive docs are a brownfield playbook, not this contract.
+servers:
+  - url: http://localhost:8080
+    description: Local default APP_BASE_URL
+paths:
+  /api/v1/shorten:
+    post:
+      operationId: shorten
+      summary: Create a short URL
+      tags: [Shorten]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortenRequest'
+      responses:
+        '201':
+          description: Mapping created, or an existing active mapping returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortenResponse'
+        '400':
+          description: Invalid body (URL, TTL, script payload, or self-loop)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Database unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /short/{shortCode}:
+    get:
+      operationId: redirect
+      summary: Redirect to the long URL
+      tags: [Redirect]
+      parameters:
+        - name: shortCode
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9A-Za-z]{1,10}$'
+            example: b9K2x1
+      responses:
+        '302':
+          description: Active mapping. Location is the long URL. Never 301.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              required: true
+        '404':
+          description: Missing or expired code. Friendly HTML, not JSON, and not the framework default error body.
+          content:
+            text/html:
+              schema:
+                type: string
+components:
+  schemas:
+    ShortenRequest:
+      type: object
+      required: [longUrl]
+      properties:
+        longUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+          example: https://example.com/api-design/api-design-url-shortening-service/
+        ttlInDays:
+          type: integer
+          minimum: 1
+          maximum: 3650
+          description: Optional. Omitted value means 730 days. 365 is an example, not the default.
+          example: 365
+    ShortenResponse:
+      type: object
+      required: [longUrl, shortUrl, shortCode, expiresAt]
+      properties:
+        longUrl:
+          type: string
+          format: uri
+        shortUrl:
+          type: string
+          format: uri
+          description: '{APP_BASE_URL}/short/{shortCode}'
+          example: http://localhost:8080/short/b9K2x1
+        shortCode:
+          type: string
+          minLength: 5
+          maxLength: 7
+          example: b9K2x1
+        expiresAt:
+          type: string
+          format: date-time
+          example: '2027-10-09T09:25:00Z'
+    ErrorResponse:
+      type: object
+      required: [status, error, message]
+      properties:
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+        shortCode:
+          type: string
+          nullable: true

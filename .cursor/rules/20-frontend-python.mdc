@@ -1,0 +1,33 @@
+---
+description: Python UI — API usage, Python 3.13, and the visual spec
+globs: frontend/**/*.{py,html,css,js}
+alwaysApply: false
+---
+
+# Frontend implementation contract
+
+Read `specs/frontend/PRD.md`, `DESIGN.md`, `TECH_STACK.md`, and `TESTING_PLAN.md` before changing matching files. Words for short code, TTL, and expiry come from `specs/domain/glossary.md`.
+
+## API
+
+The UI calls only `POST /api/v1/shorten` as written in `specs/contracts/openapi.yaml`. `urlshortener_web.shorten` builds that JSON. It does not add stats, auth, custom aliases, or a second error shape. A short link is opened with a normal browser navigation to the absolute `shortUrl`. Do not `fetch` or `httpx` that redirect.
+
+Dev traffic goes through the port 5173 proxy in `TECH_STACK.md`. Do not add a CORS middleware to `backend/` from this rule.
+
+## Stack
+
+Python 3.13, Starlette, Jinja2, Uvicorn, httpx. Dependencies are the allow-list in `specs/frontend/TECH_STACK.md`. No UI kit, no chart library, no analytics SDK, no Node.js toolchain.
+
+```python
+# blank lifetime — key omitted
+{"longUrl": "https://example.com/docs"}
+
+# filled lifetime
+{"longUrl": "https://example.com/docs", "ttlInDays": 365}
+```
+
+## UI
+
+Follow `specs/frontend/DESIGN.md`: paper and ink palette, Fraunces and Source Sans 3, and the four local pictures (hero plus three steps). Every picture has alt text. Ship the images under `frontend/src/urlshortener_web/static/assets/` and the fonts under `static/fonts/`. Do not hotlink them.
+
+Show `message` from a **400** or **503** body. Leave TTL blank to omit `ttlInDays`. The success line is “Short link ready” for every **201**, including an idempotent reuse.
