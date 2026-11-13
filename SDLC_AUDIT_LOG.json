@@ -1,0 +1,114 @@
+[
+  {
+    "timestamp": "2026-11-12T22:06:00Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Created backend/src/urlshortener/db/schema.sql with utf8mb4 and AUTO_INCREMENT=56800235.",
+    "upstream_dependency": "specs/greenfield/SYSTEM_DESIGN.md",
+    "upstream_dependency_hash": "c6e3e8497f0d8ff1c2c1a774802f6194af8c59572db07b940649fa16876c8699",
+    "rationale": "The numeric id must start at 56800235 so the first Base62 codes are at least 5 characters."
+  },
+  {
+    "timestamp": "2026-11-12T22:06:30Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Created encoding/base62.py with encode and decode.",
+    "upstream_dependency": "specs/greenfield/SYSTEM_DESIGN.md",
+    "upstream_dependency_hash": "c6e3e8497f0d8ff1c2c1a774802f6194af8c59572db07b940649fa16876c8699",
+    "rationale": "Deterministic ID-to-Base62 encoding avoids hash-collision retries on insert."
+  },
+  {
+    "timestamp": "2026-11-12T22:07:30Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Created the FastAPI module: pyproject.toml, settings, SQLAlchemy model, repository, service, routes, and exception handlers. Docs URLs are disabled.",
+    "upstream_dependency": "specs/greenfield/TECH_STACK.md",
+    "upstream_dependency_hash": "6a7a8d475f4de6d4f3b6dbf89d1a745c81babb59ea69f58e8b2314d8b742957e",
+    "rationale": "Stage 3C is the HTTP service. Paths and status codes follow PRD.md."
+  },
+  {
+    "timestamp": "2026-11-12T22:08:00Z",
+    "stage": "TESTING",
+    "action_taken": "Added the mandatory pytest modules for Base62, the service, expiry cleanup, and the API.",
+    "upstream_dependency": "specs/greenfield/TESTING_PLAN.md",
+    "upstream_dependency_hash": "cc720e76c90e679e6e5b298411de196ffb77791827b7a3f0eda434e5605a170c",
+    "rationale": "Gate 4 requires those cases on SQLite with the id sequence starting at 56800235."
+  },
+  {
+    "timestamp": "2026-11-12T22:09:30Z",
+    "stage": "REPAIR",
+    "action_taken": "Corrected the expiry-cleanup assertion so it reads rows from a new session after the delete.",
+    "upstream_dependency": "specs/greenfield/TESTING_PLAN.md",
+    "upstream_dependency_hash": "cc720e76c90e679e6e5b298411de196ffb77791827b7a3f0eda434e5605a170c",
+    "rationale": "The delete removed the expired row. The first assertion still held the cached object."
+  },
+  {
+    "timestamp": "2026-11-12T22:12:00Z",
+    "stage": "TESTING",
+    "action_taken": "pytest from backend/ passed 29 tests. coverage.json totals are 302 covered lines and 353 statements.",
+    "upstream_dependency": "specs/greenfield/TESTING_PLAN.md",
+    "upstream_dependency_hash": "cc720e76c90e679e6e5b298411de196ffb77791827b7a3f0eda434e5605a170c",
+    "rationale": "Gate 4 requires a green suite and line coverage of at least 0.80."
+  },
+  {
+    "timestamp": "2026-11-12T22:13:20Z",
+    "stage": "REPAIR",
+    "action_taken": "Removed the prod connect argument ssl_mode. PyMySQL 1.2 already prefers TLS and rejects that keyword.",
+    "upstream_dependency": "specs/greenfield/TECH_STACK.md",
+    "upstream_dependency_hash": "6a7a8d475f4de6d4f3b6dbf89d1a745c81babb59ea69f58e8b2314d8b742957e",
+    "rationale": "The first container start failed before it could listen on 8080."
+  },
+  {
+    "timestamp": "2026-11-12T22:14:01Z",
+    "stage": "RELEASE",
+    "action_taken": "Built url-shortener-python-application:latest and started compose. POST /api/v1/shorten returned 201 and GET /short/3QkkP returned 302.",
+    "upstream_dependency": "specs/greenfield/ORCHESTRATION_MANIFEST.md",
+    "upstream_dependency_hash": "79817218aba28375764b179e6ceab7579fd3761542330dee9283d7fc78afb50a",
+    "rationale": "Stage 6 requires the process to listen on port 8080 against MySQL 8.0."
+  },
+  {
+    "timestamp": "2026-11-12T22:26:00Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Enabled FastAPI docs at /docs and /openapi.json. Redirect stays include_in_schema false. Prod stays off unless DOCS_ENABLED=true.",
+    "upstream_dependency": "specs/brownfield/01-add-swagger.md",
+    "upstream_dependency_hash": "7be687aa17521e640363b3686757a8ecc98487d17d56f7038363cf88aeefb75e",
+    "rationale": "Gate 4 is green and the human signature [APPROVED: yitin] swagger is recorded. FastAPI already serves the schema, so no package was added."
+  },
+  {
+    "timestamp": "2026-11-12T22:35:00Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Added LegalPathMiddleware and legal_paths. Illegal URLs return the friendly HTML 404 before routing. pytest from backend/ passed 40 tests. coverage.json totals are 361 covered lines and 413 statements.",
+    "upstream_dependency": "specs/brownfield/02-legal-paths.md",
+    "upstream_dependency_hash": "838b7b34ca829617593e6ad65c53761eb97434c96e574b5d6c544f0d4bb70161",
+    "rationale": "Gate 4 is green and the human signature [APPROVED: yitin] Legal paths is recorded. No package and no table were added."
+  },
+  {
+    "timestamp": "2026-11-12T22:45:00Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Added beautifulsoup4 and SanitizeMiddleware. HTML in longUrl raises SanitizationError and returns the existing 400 JSON. Routes stay public. pytest from backend/ passed 45 tests. coverage.json totals are 433 covered lines and 482 statements.",
+    "upstream_dependency": "specs/brownfield/03-security-jsoup.md",
+    "upstream_dependency_hash": "9ba0d29ec6c621ca95c2d8a2f34d3eb623d8d6e61a953f7f020586ee04048b81",
+    "rationale": "Gate 4 is green and the human signature [APPROVED: yitin] Security and Jsoup is recorded. The new package is beautifulsoup4 with the stdlib html.parser. No auth library and no table were added."
+  },
+  {
+    "timestamp": "2026-11-12T22:49:00Z",
+    "stage": "OBSERVABILITY",
+    "action_taken": "Updated README.md and the Outputs sections of specs/scenarios/01-greenfield.md and 02-brownfield.md from the workspace. pytest from backend/ passed 45 tests. coverage.json totals are 433 covered lines and 482 statements. stage7_epoch_ms stays 1794521641000. stage1_epoch_ms, end_to_end_latency_ms, and mttr_ms stay null. Image url-shortener-python-application:latest is present and compose is up on port 8080.",
+    "upstream_dependency": "specs/brownfield/04-refine.md",
+    "upstream_dependency_hash": "61867ccb55594963cfac13b61a833e81767147443de9d173150c11d242ee2d18",
+    "rationale": "Gate 4 is green and the human signature [APPROVED: yitin] Docs and metrics is recorded. This pass changes documentation and measured lineage only. No package and no table were added."
+  },
+  {
+    "timestamp": "2026-11-12T23:02:00Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Replaced the four frontend photographs with a cool morning-light set and updated the alt text in specs/frontend/DESIGN.md and TESTING_PLAN.md. WebP files are in frontend/src/urlshortener_web/static/assets/.",
+    "upstream_dependency": "specs/frontend/DESIGN.md",
+    "upstream_dependency_hash": "8118a6ceac2f9105d6bfc58b00b923277840a8e8af4f9393f3507df13035856c",
+    "rationale": "The previous scenes matched the other client. These pictures let a person tell the Python client apart. No API package and no table were added."
+  },
+  {
+    "timestamp": "2026-11-12T23:10:00Z",
+    "stage": "IMPLEMENTATION",
+    "action_taken": "Created the Starlette client in frontend/. The form posts to the UI, and urlshortener_web.shorten calls POST /api/v1/shorten. pytest from frontend/ passed 15 tests. That plan has no coverage percentage.",
+    "upstream_dependency": "specs/frontend/PRD.md",
+    "upstream_dependency_hash": "24c38ebd85646732dca24efb16b86e4eb73aadd32d4426544d5e6504c1f9d17b",
+    "rationale": "The human signature [APPROVED: yitin] client is recorded. The UI is not a backend dependency and does not add an API."
+  }
+]

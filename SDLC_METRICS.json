@@ -1,0 +1,13 @@
+{
+  "success_rate": {
+    "compiled_ok": 1,
+    "syntax_failures": 0
+  },
+  "retry_rollback_frequency": 2,
+  "mttr_ms": null,
+  "stage1_epoch_ms": null,
+  "stage7_epoch_ms": 1794521641000,
+  "end_to_end_latency_ms": null,
+  "coverage_line_ratio": 0.8983402489626556,
+  "updated_at": "2026-11-12T22:49:00Z"
+}

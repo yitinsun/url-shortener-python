@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: Tiger
+      MYSQL_DATABASE: shortener_prod
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pTiger"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - ./backend/src/urlshortener/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+  application:
+    build: ./backend
+    environment:
+      APP_ENV: prod
+      DOCS_ENABLED: "true"
+      APP_BASE_URL: http://localhost:8080
+      DB_HOST: mysql
+      DB_NAME: shortener_prod
+      DB_USER: root
+      DB_PASSWORD: Tiger
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
