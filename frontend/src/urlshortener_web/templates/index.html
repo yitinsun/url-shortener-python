@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Short</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-copy">
+        <a class="wordmark" href="/">Short</a>
+        <h1>Create a link. Open it later.</h1>
+        <div class="card">
+          <form method="post" action="/" {% if error %}aria-describedby="form-error"{% endif %}>
+            <label for="long-url">Long URL</label>
+            <input id="long-url" name="longUrl" type="text" autocomplete="off" value="{{ long_url }}">
+            <label for="ttl">Lifetime in days (optional)</label>
+            <input id="ttl" name="ttlInDays" type="text" inputmode="numeric" placeholder="365" value="{{ ttl_text }}">
+            <p class="help">Leave blank for 2 years. Whole days from 1 to 3650.</p>
+            {% if error %}<p class="error" id="form-error">{{ error }}</p>{% endif %}
+            <button class="primary" type="submit">Create short link</button>
+          </form>
+        </div>
+        {% if result %}
+        <div class="card result">
+          <h2>Short link ready</h2>
+          <p class="short-url">{{ result.short_url }}</p>
+          <p>Short code {{ result.short_code }}</p>
+          <p>Expiry <time datetime="{{ result.expires_at }}">{{ result.expires_label }}</time></p>
+          <p class="long-url">{{ result.long_url }}</p>
+          <div class="actions">
+            <button type="button" data-short-url="{{ result.short_url }}">Copy short link</button>
+            <a class="open-link" href="{{ result.short_url }}" target="_blank" rel="noopener">Open short link</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <img class="hero-photo" src="/static/assets/hero-desk.webp" alt="Stone table with an open sketchbook, a pencil, and a ceramic cup">
+    </header>
+    <ol class="steps">
+      <li>
+        <img src="/static/assets/step-paste.webp" alt="Hands lowering a rolled blue sheet into a ceramic bowl">
+        <p class="step-num">1</p>
+        <h2>Paste</h2>
+        <p>The long URL is the request body.</p>
+      </li>
+      <li>
+        <img src="/static/assets/step-code.webp" alt="Five dotted stones in a row on blue paper">
+        <p class="step-num">2</p>
+        <h2>Code</h2>
+        <p>The service stores a mapping and returns a Base62 short code.</p>
+      </li>
+      <li>
+        <img src="/static/assets/step-open.webp" alt="Open window looking onto a garden path">
+        <p class="step-num">3</p>
+        <h2>Open</h2>
+        <p>The short URL hits GET /short/{shortCode} and the browser is sent to the long URL with 302.</p>
+      </li>
+    </ol>
+    <p class="note">Codes are plain Base62. Lifetime defaults to two years when omitted.</p>
+    <footer>Short links are served by the API. Opening one leaves this page.</footer>
+  </div>
+  <script src="/static/app.js"></script>
+  <script>
+    const form = document.querySelector("form");
+    if (form) {
+      form.addEventListener("submit", () => {
+        const button = form.querySelector("button[type=submit]");
+        if (!button) return;
+        button.disabled = true;
+        button.textContent = "Creating…";
+      });
+    }
+    const expiry = document.querySelector("time[datetime]");
+    if (expiry && expiry.dateTime) {
+      const parsed = new Date(expiry.dateTime);
+      if (!Number.isNaN(parsed.valueOf())) {
+        expiry.textContent = parsed.toLocaleString(undefined, { timeZoneName: "short" });
+      }
+    }
+  </script>
+</body>
+</html>

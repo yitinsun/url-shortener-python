@@ -1,0 +1,31 @@
+---
+description: v1 URL shortener API stack, schema, and test contract
+globs: backend/**
+alwaysApply: false
+---
+
+# Backend implementation contract
+
+Read `specs/greenfield/PRD.md`, `SYSTEM_DESIGN.md`, `TECH_STACK.md`, and `TESTING_PLAN.md` before changing matching files. The HTTP contract is `specs/contracts/openapi.yaml`.
+
+## Stack
+
+Python 3.13, FastAPI, Uvicorn, Pydantic v2, SQLAlchemy 2, PyMySQL, pydantic-settings. Tests use SQLite, pytest, and pytest-cov line coverage ≥ 0.80. Module root is `backend/`, package `urlshortener`. Beautiful Soup is allowed only after the signed playbook `03-security-jsoup.md`. Do not add Redis, Alembic, an auth library, a retry library, Safe Browsing clients, JWT, or OAuth.
+
+API bodies are frozen Pydantic models. Queries use bound parameters (no f-string SQL). Secrets via environment variables as in `TECH_STACK.md`.
+
+```python
+# allowed
+session.execute(delete(UrlMapping).where(UrlMapping.expires_at < bindparam("cutoff")), {"cutoff": now})
+
+# rejected — Gate 4C
+session.execute(text(f"DELETE FROM url_mappings WHERE expires_at < '{now}'"))
+```
+
+## Domain
+
+Package `urlshortener`. `url_mappings` DDL and seed `56800235` from `SYSTEM_DESIGN.md` (`backend/src/urlshortener/db/schema.sql`, utf8mb4). Short codes are plain Base62(id). Idempotent create for an **active** exact `longUrl`. Default TTL 730 days. `GET /short/{shortCode}` returns 302, never 301. Missing or expired codes return **404 HTML**, not JSON and not FastAPI’s `{"detail": ...}` body.
+
+## Tests
+
+Mandatory modules and cases in `TESTING_PLAN.md`. API tests use `APP_ENV=test` (SQLite, next id 56800235), not a mocked service. Gate 4 command is the pytest coverage command in that plan, run from `backend/`.

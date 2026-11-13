@@ -1,0 +1,39 @@
+AGENTS.md
+GATE2_APPROVAL.txt
+SDLC_AUDIT_LOG.json
+SDLC_METRICS.json
+├── .cursor/
+│   ├── rules/
+│   │   ├── 00-lifecycle.mdc          # alwaysApply: Gate 2, stage order, 3-retry stop
+│   │   ├── 10-backend-python.mdc     # globs: backend/**
+│   │   └── 20-frontend-python.mdc    # globs: frontend/**/*.{py,html,css,js}
+│   └── skills/
+│       └── url-shortener-sdlc/SKILL.md
+├── specs/
+│   ├── greenfield/                   # these files generate the app
+│   │   ├── PRD.md
+│   │   ├── SYSTEM_DESIGN.md
+│   │   ├── TECH_STACK.md             # Python 3.13, FastAPI; UI is specs/frontend
+│   │   ├── TESTING_PLAN.md
+│   │   ├── INSTRUCTIONS.md
+│   │   └── ORCHESTRATION_MANIFEST.md
+│   ├── domain/
+│   │   └── glossary.md
+│   ├── contracts/
+│   │   └── openapi.yaml              # same paths and codes as PRD.md
+│   ├── brownfield/                   # one playbook per change, after Gate 4
+│   │   ├── 01-add-swagger.md         # FastAPI /docs and /openapi.json
+│   │   ├── 02-legal-paths.md
+│   │   ├── 03-security-jsoup.md      # public routes + Beautiful Soup
+│   │   └── 04-refine.md
+│   ├── frontend/                     # Python UI; uses the OpenAPI contract
+│   │   ├── PRD.md                    # create, copy, open — POST /api/v1/shorten
+│   │   ├── DESIGN.md                 # paper/ink UI and four photographs
+│   │   ├── TECH_STACK.md             # Python 3.13, Starlette, Jinja2, Uvicorn
+│   │   └── TESTING_PLAN.md
+│   └── scenarios/                    # evaluation indexes only
+│       ├── 01-greenfield.md
+│       ├── 02-brownfield.md
+│       └── 03-ambiguous.md           # options, v1 pick, halt — no tasks
+├── backend/                          # FastAPI service later
+└── frontend/                         # Python UI later

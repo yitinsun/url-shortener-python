@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: urlshortener-web
+Version: 0.1.0
+Requires-Python: >=3.13
+Requires-Dist: starlette>=0.46
+Requires-Dist: jinja2<4,>=3.1
+Requires-Dist: uvicorn<1,>=0.32
+Requires-Dist: httpx<1,>=0.27
+Provides-Extra: dev
+Requires-Dist: pytest<9,>=8; extra == "dev"
